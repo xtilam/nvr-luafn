@@ -49,31 +49,39 @@ fn main() {
     );
 }
 
-// macro_rules! die {
-//     ($($arg:tt)*) => {{
-//         use std::process;
-//         eprintln!($($arg)*);
-//         process::exit(0);
-//     }};
-// }
+macro_rules! die_fn {
+    ($($arg:tt)*) => {|_|{
+        use std::process;
+        eprintln!($($arg)*);
+        process::exit(0);
+    }};
+}
+macro_rules! die {
+    ($($arg:tt)*) => {{
+        use std::process;
+        eprintln!($($arg)*);
+        process::exit(0);
+    }};
+}
 
 fn spawn_detached(com: &mut Command) {
     #[cfg(unix)]
     {
         use std::{fs::File, os::unix::process::CommandExt};
-        if let Ok(devnull) = File::open("/dev/null") {
-            com.stdin(devnull.try_clone().ok()?)
-                .stdout(devnull.try_clone().ok()?)
-                .stderr(devnull)
-                .before_exec(|| {
-                    unsafe {
-                        libc::setsid();
-                    }
-                    Ok(())
-                })
-                .spawn()
-                .ok();
-        }
+        let devnull = File::open("/dev/null")
+            .ok()
+            .expect("Failed to open /dev/null");
+        com.stdin(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
+            .stdout(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
+            .stderr(devnull)
+            .before_exec(|| {
+                unsafe {
+                    libc::setsid();
+                }
+                Ok(())
+            })
+            .spawn()
+            .ok();
     }
 
     #[cfg(windows)]
