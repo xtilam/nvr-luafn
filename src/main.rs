@@ -49,30 +49,22 @@ fn main() {
     );
 }
 
-macro_rules! die {
-    ($($arg:tt)*) => {{
-        use std::process;
-        eprintln!($($arg)*);
-        process::exit(0);
-    }};
-}
-
 fn spawn_detached(com: &mut Command) {
     #[cfg(unix)]
     {
-        use std::{fs::File, os::unix::process::CommandExt};
+        use std::{fs::File};
         let devnull = File::open("/dev/null")
             .ok()
             .expect("Failed to open /dev/null");
         com.stdin(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
             .stdout(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
             .stderr(devnull)
-            .pre_exec(unsafe|| {
+            .pre_exec(unsafe{ || {
                 unsafe {
                     libc::setsid();
                 }
                 Ok(())
-            })
+            }})
             .spawn()
             .ok();
     }
