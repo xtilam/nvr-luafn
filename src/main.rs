@@ -62,8 +62,7 @@ fn spawn_detached(com: &mut Command) {
     {
         use std::{fs::File, os::unix::process::CommandExt};
         if let Ok(devnull) = File::open("/dev/null") {
-            let _ = com
-                .stdin(devnull.try_clone().ok()?)
+            com.stdin(devnull.try_clone().ok()?)
                 .stdout(devnull.try_clone().ok()?)
                 .stderr(devnull)
                 .before_exec(|| {
@@ -72,7 +71,8 @@ fn spawn_detached(com: &mut Command) {
                     }
                     Ok(())
                 })
-                .spawn();
+                .spawn()
+                .ok();
         }
     }
 
