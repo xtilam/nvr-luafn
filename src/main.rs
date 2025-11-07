@@ -49,13 +49,6 @@ fn main() {
     );
 }
 
-macro_rules! die_fn {
-    ($($arg:tt)*) => {|_|{
-        use std::process;
-        eprintln!($($arg)*);
-        process::exit(0);
-    }};
-}
 macro_rules! die {
     ($($arg:tt)*) => {{
         use std::process;
