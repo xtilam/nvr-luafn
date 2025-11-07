@@ -57,28 +57,28 @@ fn main() {
 //     }};
 // }
 
-#[cfg(unix)]
-fn spawn_detached(com: &mut Command) -> std::io::Result<()> {
-    use std::{fs::File, os::unix::process::CommandExt};
-    let devnull = File::open("/dev/null")?;
-    com.stdin(devnull.try_clone()?)
-        .stdout(devnull.try_clone()?)
-        .stderr(devnull)
-        .before_exec(|| {
-            unsafe {
-                libc::setsid();
-            }
-            Ok(())
-        })
-        .spawn()?;
+fn spawn_detached(com: &mut Command) {
+    #[cfg(unix)]
+    {
+        use std::{fs::File, os::unix::process::CommandExt};
+        let devnull = File::open("/dev/null")?;
+        com.stdin(devnull.try_clone()?)
+            .stdout(devnull.try_clone()?)
+            .stderr(devnull)
+            .before_exec(|| {
+                unsafe {
+                    libc::setsid();
+                }
+                Ok(())
+            })
+            .spawn()
+            .ok();
+    }
 
-    Ok(())
-}
-
-#[cfg(windows)]
-fn spawn_detached(com: &mut Command) -> std::io::Result<()> {
-    use std::os::windows::process::CommandExt;
-    const DETACHED_PROCESS: u32 = 0x00000008;
-    com.creation_flags(DETACHED_PROCESS).spawn()?;
-    Ok(())
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        const DETACHED_PROCESS: u32 = 0x00000008;
+        com.creation_flags(DETACHED_PROCESS).spawn().ok();
+    }
 }
