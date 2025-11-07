@@ -15,7 +15,7 @@ fn main() {
     #[cfg(debug_assertions)]
     println!("NVIM_LISTEN_ADDRESS: {}", nvim_address);
 
-    let args: Vec<String> = env::args().skip(1).collect(); // bỏ tên file
+    let args: Vec<String> = env::args().skip(1).collect();
     let lua_code = format!(
         "({{ pcall(({{pcall(loadstring('return ' .. {}))}})[2], {}) }})[2]",
         json!(nvim_fn_call),
