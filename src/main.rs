@@ -61,18 +61,19 @@ fn spawn_detached(com: &mut Command) {
     #[cfg(unix)]
     {
         use std::{fs::File, os::unix::process::CommandExt};
-        let devnull = File::open("/dev/null")?;
-        com.stdin(devnull.try_clone()?)
-            .stdout(devnull.try_clone()?)
-            .stderr(devnull)
-            .before_exec(|| {
-                unsafe {
-                    libc::setsid();
-                }
-                Ok(())
-            })
-            .spawn()
-            .ok();
+        if let Ok(devnull) = File::open("/dev/null") {
+            let _ = com
+                .stdin(devnull.try_clone().ok()?)
+                .stdout(devnull.try_clone().ok()?)
+                .stderr(devnull)
+                .before_exec(|| {
+                    unsafe {
+                        libc::setsid();
+                    }
+                    Ok(())
+                })
+                .spawn();
+        }
     }
 
     #[cfg(windows)]
