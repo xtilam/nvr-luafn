@@ -67,7 +67,7 @@ fn spawn_detached(com: &mut Command) {
         com.stdin(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
             .stdout(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
             .stderr(devnull)
-            .pre_exec(|| {
+            .pre_exec(unsafe|| {
                 unsafe {
                     libc::setsid();
                 }
