@@ -1,7 +1,6 @@
-name: Build Binary
+name: Build and Release
 
 on:
-  workflow_dispatch:
   push:
     tags:
       - '*'
@@ -21,5 +20,29 @@ jobs:
         with:
           toolchain: stable
 
-      - name: Build
+      - name: Build release binary
         run: cargo build --release
+
+      - name: Package binary
+        run: |
+          mkdir -p release
+          if [[ "${{ runner.os }}" == "Windows" ]]; then
+            cp target/release/my_binary.exe release/
+          else
+            cp target/release/my_binary release/
+          fi
+
+      - name: Create GitHub Release
+        id: gh_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload Release Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
