@@ -27,9 +27,9 @@ jobs:
         run: |
           mkdir -p release
           if [[ "${{ runner.os }}" == "Windows" ]]; then
-            cp target/release/my_binary.exe release/
+            cp target/release/nvr-luafn.exe release/
           else
-            cp target/release/my_binary release/
+            cp target/release/nvr-luafn release/
           fi
 
       - name: Create GitHub Release
