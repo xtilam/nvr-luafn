@@ -49,14 +49,6 @@ fn main() {
     );
 }
 
-macro_rules! die {
-    ($($arg:tt)*) => {{
-        use std::process;
-        eprintln!($($arg)*);
-        process::exit(0);
-    }};
-}
-
 fn spawn_detached(com: &mut Command) {
     #[cfg(unix)]
     {
@@ -64,17 +56,17 @@ fn spawn_detached(com: &mut Command) {
         let devnull = File::open("/dev/null")
             .ok()
             .expect("Failed to open /dev/null");
-        com.stdin(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
-            .stdout(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
-            .stderr(devnull)
-            .pre_exec(|| {
-                unsafe {
-                    libc::setsid();
-                }
-                Ok(())
-            })
-            .spawn()
-            .ok();
+        unsafe {
+            com.stdin(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
+                .stdout(devnull.try_clone().ok().expect("Failed to clone /dev/null"))
+                .stderr(devnull)
+                .pre_exec(|| {
+                    libc::setsid(); // gọi libc vẫn cần unsafe, nhưng đã ở trong unsafe block
+                    Ok(())
+                })
+                .spawn()
+                .ok();
+        }
     }
 
     #[cfg(windows)]
