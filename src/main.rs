@@ -52,7 +52,7 @@ fn main() {
 fn spawn_detached(com: &mut Command) {
     #[cfg(unix)]
     {
-        use std::{fs::File, os::unix::process::CommandExt};
+        use std::fs::File;
         let devnull = File::open("/dev/null")
             .ok()
             .expect("Failed to open /dev/null");
